@@ -7,8 +7,19 @@ passport.use(
         {
             clientID: keys.googleClientID,
             clientSecret: keys.googleClientSecret,
-            callbackURL: 'https://auguste-cours-node.herokuapp.com/auth/google/callback',
+            callbackURL: '/auth/google/callback',
             proxy: true
+        },
+        (accessToken, refreshToken, profile, done) => {
+            //User.findOne({ googleId: profile.id }).then(existingUser);
+            //if (existingUser) {
+            //    done(null, existingUser);
+            //} else {
+//
+            //}
+            done(null,{
+                ok:'ok'
+            });
         }
     )
 );
