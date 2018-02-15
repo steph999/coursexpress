@@ -7,7 +7,7 @@ passport.use(
         {
             clientID: keys.googleClientID,
             clientSecret: keys.googleClientSecret,
-            callbackURL: '/auth/google/callback',
+            callbackURL: 'https://auguste-cours-node.herokuapp.com/auth/google/callback',
             proxy: true
         }
     )
