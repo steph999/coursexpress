@@ -1,9 +1,9 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const cookieSession = require('cookie-session');
 const passport = require('passport');
+const mongoose = require('mongoose');
 const keys = require('./config/keys');
-require('./models/User');
+
 require('./services/passport');
 
 mongoose.connect(keys.mongoURI);
@@ -25,4 +25,6 @@ require('./routes/authRoutes')(app);
 
 // Lancement du serveur sur le port 5000
 const PORT = process.env.PORT || 5000;
-app.listen(PORT);
+app.listen(PORT, () => {
+    console.log('Serveur démarré sur le port : ' + PORT);
+});
