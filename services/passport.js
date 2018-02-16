@@ -6,43 +6,48 @@ const User = require('../models/User');
 
 passport.serializeUser((user, done) => {
     console.log('serialize', user);
-    done(null, user.googleId);
+    done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
 
-    User.findOne({googleId: id})
-    // User.findById(id)
+    // User.findOne({googleId: id})
+    User.findById(id)
         .then(user => {
             done(null, user);
-        });
-    console.log('déserialize', id);
+        })
+    // console.log('déserialize', id);
 });
-passport.use(new GoogleStrategy({
-        clientID: keys.googleClientID,
-        clientSecret: keys.googleClientSecret,
-        callbackURL: '/auth/google/callback'
-    }, (accessToken, refresToken, profile, done) => {
-        console.log('Access token', accessToken);
-        console.log('Refresh token', refresToken);
-        console.log('Profile', profile);
+passport.use(
+    new GoogleStrategy(
+        {
+            clientID: keys.googleClientID,
+            clientSecret: keys.googleClientSecret,
+            callbackURL: '/auth/google/callback',
+            proxy: true
+        },
+        (accessToken, refresToken, profile, done) => {
+            console.log('Access token', accessToken);
+            console.log('Refresh token', refresToken);
+            console.log('Profile', profile);
 
-        User.findOne({googleId: profile.id}).then(existingUser => {
-            if (existingUser) {
-                done(null, existingUser);
-            }
-            else {
-                new User({
-                    googleId: profile.id,
-                    nom: profile.displayName
-                })
-                    .save()
-                    .then(
-                        user => done(null, user)
-                    );
-            }
-        });
+            User.findOne({googleId: profile.id}).then((existingUser) => {
+                if (existingUser) {
+                    done(null, existingUser);
+                }
+                else {
+                    console.log('new');
+                    new User({
+                        googleId: profile.id,
+                        nom: profile.displayName
+                    })
+                        .save()
+                        .then(
+                            user => done(null, user)
+                        );
+                }
+            });
 
-    }
+        }
     )
 );
