@@ -1,41 +1,39 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const mongoose = require('mongoose');
 const keys = require('../config/keys');
+const mongoose = require('mongoose');
+const User = require('../models/User');
 
-const User = mongoose.model('users');
 
-passport.serializeUser((user, done)=> {
+passport.serializeUser((user, done) => {
+    console.log('serialize ', user.id);
     done(null, user.id);
 });
 
-passport.deserializeUser((id, done) => {
-    User.findById(id)
-        .then(user => {
-            done(null, user);
-        })
+passport.deserializeUser(async (id, done) => {
+    console.log('deserialize ', id);
+    try {
+        const user = await User.findOne({"_id": id});
+        return done(null, user)
+    } catch(err) {
+        return done(null, null);
+    }
+
 });
 
-passport.use(
-    new GoogleStrategy(
-        {
-            clientID: keys.googleClientID,
-            clientSecret: keys.googleClientSecret,
-            callbackURL: '/auth/google/callback',
-            proxy: true
-        },
-        (accessToken , refreshToken, profile, done)=> {
-            User.findOne({ googleId: profile.id }).then((existingUser) => {
-                if(existingUser){
-                    done(null, existingUser);
-                } else {
-                    console.log('new');
-                    new User({ googleId: profile.id })
-                        .save()
-                        .then(user => done(null, user));
-                }
-            })
+passport.use(new GoogleStrategy({
+        clientID: keys.googleClientID,
+        clientSecret: keys.googleClientSecret,
+        callbackURL: '/auth/google/callback'
+    },
+    async (accessToken, refresToken, profile, done) => {
+        const existingUser = await User.findOne({ googleId: profile.id });
+        if(existingUser) {
+            return done(null, existingUser);
         }
-
+        const user = await (new User({ googleId: profile.id, nom: profile.displayName })).save();
+        done(null, user);
+    }
     )
 );
+
