@@ -6,11 +6,11 @@ const User = require('../models/User');
 
 passport.serializeUser((user, done) => {
     console.log('serialize');
-    done(null, user.id);
+    done(null, user.googleId);
 });
 
 passport.deserializeUser((id, done) => {
-    User.findOne({"_id": id})
+    User.findOne({googleId: id})
         .then(user => {
             done(null, user)
         })
