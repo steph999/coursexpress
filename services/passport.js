@@ -6,11 +6,11 @@ const User = require('../models/User');
 
 passport.serializeUser((user, done) => {
     console.log('serialize');
-    done(null, user.googleId);
+    done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
-    User.findOne({googleId: id})
+    User.findOne({"_id": id})
         .then(user => {
             done(null, user)
         })
@@ -29,7 +29,11 @@ passport.use(new GoogleStrategy({
                 done(null, existingUser);
             }
             else {
-                new User({googleId: profile.id, nom: profile.name}).save().then(user => done(null, user));
+                new User({googleId: profile.id, nom: profile.name})
+                    .save()
+                    .then(
+                        user => done(null, user)
+                    );
             }
         });
 
